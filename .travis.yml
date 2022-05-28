@@ -18,5 +18,3 @@ jobs:
       script: ./mvnw clean test -B
     - stage: build
       script: ./mvnw clean install -B
-
-script: echo $MONGO_URL
