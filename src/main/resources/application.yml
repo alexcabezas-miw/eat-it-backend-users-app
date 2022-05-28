@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      database: usersDB
+      uri: ${MONGO_URL}
