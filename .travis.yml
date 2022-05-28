@@ -18,3 +18,10 @@ jobs:
       script: ./mvnw clean test -B
     - stage: build
       script: ./mvnw clean install -B
+    - stage: deploy to heroku
+      deploy:
+        provider: heroku
+        api_key: $HEROKU_API_KEY
+        app: eat-it-users-app
+        on:
+          condition: $TRAVIS_BRANCH =~ ^(master|develop)$
