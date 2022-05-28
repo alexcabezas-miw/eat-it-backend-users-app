@@ -1,5 +1,6 @@
 package com.upm.miw.tfm.eatitusersapp.web;
 
+import com.upm.miw.tfm.eatitusersapp.exception.ValidationException;
 import com.upm.miw.tfm.eatitusersapp.service.UsersService;
 import com.upm.miw.tfm.eatitusersapp.web.dto.UserDTO;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
@@ -24,10 +26,15 @@ public class UsersController {
     }
 
     @PostMapping(CREATE_USERS_PATH)
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
-        UserDTO createdUser = this.usersService.createUser(userDTO);
-        return ResponseEntity
-                .created(URI.create(USERS_PATH + "/" + createdUser.getId()))
-                .build();
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserDTO userDTO) {
+        try {
+            UserDTO createdUser = this.usersService.createUser(userDTO);
+            return ResponseEntity
+                    .created(URI.create(USERS_PATH + "/" + createdUser.getId()))
+                    .build();
+        } catch (ValidationException e) {
+            return ResponseEntity.badRequest()
+                    .body(e.getMessage());
+        }
     }
 }
