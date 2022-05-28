@@ -1,5 +1,4 @@
 spring:
-  data:
-    mongodb:
-      database: usersDB
-      uri: mongodb://localhost/test
+  mongodb:
+    embedded:
+      version: 3.4.6
