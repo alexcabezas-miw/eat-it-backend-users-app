@@ -1,45 +1,15 @@
 package com.upm.miw.tfm.eatitusersapp.service.mapper
 
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
+import com.upm.miw.tfm.eatitusersapp.service.model.Roles
 import com.upm.miw.tfm.eatitusersapp.service.model.User
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserDTO
-import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO
+import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
 import org.springframework.beans.factory.annotation.Autowired
-import spock.util.mop.Use
 
 class UsersMapperIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     UsersMapper usersMapper
-
-    def "conversion from entity to creationDTO works correctly" () {
-        given:
-        User user = User.builder()
-                .username("username")
-                .id("id").build()
-
-        when:
-        def dto = usersMapper.toCreateUserDTO(user)
-
-        then:
-        dto.getId() == user.getId()
-        dto.getUsername() == user.getUsername()
-    }
-
-
-    def "conversion from creationDTO to entity works correctly" () {
-        given:
-        CreateUserDTO userDTO = CreateUserDTO.builder()
-                .username("username")
-                .id("id").build()
-
-        when:
-        def entity = usersMapper.fromCreateUserDTO(userDTO)
-
-        then:
-        entity.getId() == userDTO.getId()
-        entity.getUsername() == userDTO.getUsername()
-    }
 
     def "conversion from user entity to listUserDTO works correctly" () {
         given:
@@ -53,5 +23,48 @@ class UsersMapperIntegrationTest extends AbstractIntegrationTest {
         then:
         listUserDTO.getId() == user.getId()
         listUserDTO.getUsername() == user.getUsername()
+    }
+
+    def "conversion to entity from CreationDTO maps the roles correctly" () {
+        given:
+        CreateUserInputDTO userDTO = CreateUserInputDTO.builder()
+                .username("username")
+                .roles(["ADMIN"]).build()
+
+        when:
+        User user = this.usersMapper.fromCreateUserInputDTO(userDTO)
+
+        then:
+        user.getRoles() != null
+        user.getRoles().contains(Roles.ADMIN)
+    }
+
+    def "conversion to ListUserDTO from user entity maps the roles correctly" () {
+        given:
+        User user = User.builder()
+                .username("username")
+                .id("id")
+                .roles([Roles.ADMIN, Roles.DEFAULT_USER]).build()
+
+        when:
+        def userDTO = this.usersMapper.toLisUserDTO(user)
+
+        then:
+        userDTO.getRoles() != null
+        userDTO.getRoles().containsAll(["ADMIN", "DEFAULT_USER"])
+    }
+
+    def "conversion from user entity to createUserOutputDTO works correctly" () {
+        given:
+        User user = User.builder()
+                .username("username")
+                .id("id")
+                .roles([Roles.ADMIN, Roles.DEFAULT_USER]).build()
+
+        when:
+        def userDTO = this.usersMapper.toCreateUserOutputDTO(user)
+
+        then:
+        userDTO.getId() == user.getId()
     }
 }

@@ -2,6 +2,7 @@ package com.upm.miw.tfm.eatitusersapp.web
 
 import com.upm.miw.tfm.eatitusersapp.AbstractWebIntegrationTest
 import com.upm.miw.tfm.eatitusersapp.service.model.User
+import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO
 import org.springframework.web.reactive.function.BodyInserters
 
@@ -11,15 +12,32 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
         expect:
         this.webTestClient.post()
                 .uri(UsersController.USERS_PATH + UsersController.CREATE_USERS_PATH)
-                .body(BodyInserters.fromValue(new User(null, "username")))
+                .body(BodyInserters.fromValue(CreateUserInputDTO.builder().username("username").build()))
                 .exchange()
                 .expectStatus().isCreated()
     }
 
     def "Create a user returns 400 when username already exists" () {
-        expect:
-        User user = new User(null, "username")
+        given:
+        User user = User.builder().username("username").build()
         this.usersRepository.save(user)
+
+        expect:
+        this.webTestClient.post()
+                .uri(UsersController.USERS_PATH + UsersController.CREATE_USERS_PATH)
+                .body(BodyInserters.fromValue(CreateUserInputDTO.builder().username("username").build()))
+                .exchange()
+                .expectStatus().isBadRequest()
+    }
+
+    def "Create a user returns 400 when roles does not exist" () {
+        given:
+        def user = CreateUserInputDTO.builder()
+                .username("username")
+                .roles(["NOT_FOUND"])
+                .build()
+
+        expect:
         this.webTestClient.post()
                 .uri(UsersController.USERS_PATH + UsersController.CREATE_USERS_PATH)
                 .body(BodyInserters.fromValue(user))
@@ -44,5 +62,42 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
                 .value(users -> {
                     users.size() == 3
                 })
+    }
+
+    def "edit roles returns 400 if username does not exist" () {
+        expect:
+        this.webTestClient
+                .put()
+                .uri(UsersController.USERS_PATH + UsersController.EDIT_ROLES_PATH + "/not-found")
+                .body(BodyInserters.fromValue(["ADMIN"]))
+                .exchange()
+                .expectStatus().isBadRequest()
+    }
+
+
+    def "edit roles returns 400 if roles not exist" () {
+        given:
+        this.usersRepository.save(User.builder().username("username").build())
+
+        expect:
+        this.webTestClient
+                .put()
+                .uri(UsersController.USERS_PATH + UsersController.EDIT_ROLES_PATH + "/username")
+                .body(BodyInserters.fromValue(["NOT_EXIST"]))
+                .exchange()
+                .expectStatus().isBadRequest()
+    }
+
+    def "edit roles returns 204 if roles were changed correctly" () {
+        given:
+        this.usersRepository.save(User.builder().username("username").build())
+
+        expect:
+        this.webTestClient
+                .put()
+                .uri(UsersController.USERS_PATH + UsersController.EDIT_ROLES_PATH + "/username")
+                .body(BodyInserters.fromValue(["ADMIN"]))
+                .exchange()
+                .expectStatus().isNoContent()
     }
 }

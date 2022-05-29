@@ -1,10 +1,14 @@
 package com.upm.miw.tfm.eatitusersapp.service;
 
+import com.upm.miw.tfm.eatitusersapp.exception.RoleDoesNotExistValidationException;
 import com.upm.miw.tfm.eatitusersapp.exception.UserAlreadyExistValidationException;
+import com.upm.miw.tfm.eatitusersapp.exception.UserDoesNotExistValidationException;
 import com.upm.miw.tfm.eatitusersapp.repository.UsersRepository;
 import com.upm.miw.tfm.eatitusersapp.service.mapper.UsersMapper;
+import com.upm.miw.tfm.eatitusersapp.service.model.Roles;
 import com.upm.miw.tfm.eatitusersapp.service.model.User;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserDTO;
+import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
+import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +29,21 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public CreateUserDTO createUser(CreateUserDTO createUserDTO) {
-        Optional<User> foundUserByUsername = this.usersRepository.findByUsername(createUserDTO.getUsername());
+    public CreateUserOutputDTO createUser(CreateUserInputDTO createUserInputDTO) {
+        Optional<User> foundUserByUsername = this.usersRepository.findByUsername(createUserInputDTO.getUsername());
         if(foundUserByUsername.isPresent()) {
-            throw new UserAlreadyExistValidationException(createUserDTO.getUsername());
+            throw new UserAlreadyExistValidationException(createUserInputDTO.getUsername());
         }
 
-        User user = this.usersMapper.fromCreateUserDTO(createUserDTO);
-        return this.usersMapper.toCreateUserDTO(this.usersRepository.save(user));
+        List<String> roles = createUserInputDTO.getRoles();
+        roles.forEach(role -> {
+            if(!Roles.exist(role)) {
+                throw new RoleDoesNotExistValidationException(role);
+            }
+        });
+
+        User user = this.usersMapper.fromCreateUserInputDTO(createUserInputDTO);
+        return this.usersMapper.toCreateUserOutputDTO(this.usersRepository.save(user));
     }
 
     @Override
@@ -41,5 +52,26 @@ public class UsersServiceImpl implements UsersService {
                 .stream()
                 .map(this.usersMapper::toLisUserDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void editRolesByUsername(String username, Collection<String> roles) {
+        Optional<User> user = this.usersRepository.findByUsername(username);
+        if(user.isEmpty()) {
+            throw new UserDoesNotExistValidationException(username);
+        }
+
+        roles.forEach(role -> {
+            if(!Roles.exist(role)) {
+                throw new RoleDoesNotExistValidationException(role);
+            }
+        });
+
+        List<Roles> mappedRoles = roles.stream()
+                .map(Roles::valueOf)
+                .collect(Collectors.toList());
+        user.get().setRoles(mappedRoles);
+
+        this.usersRepository.save(user.get());
     }
 }
