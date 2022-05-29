@@ -21,7 +21,6 @@ class UsersMapperIntegrationTest extends AbstractIntegrationTest {
         def listUserDTO = usersMapper.toLisUserDTO(user)
 
         then:
-        listUserDTO.getId() == user.getId()
         listUserDTO.getUsername() == user.getUsername()
     }
 

@@ -125,6 +125,5 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         then:
         noExceptionThrown()
         result.getUsername() == "username"
-        result.getId() != ""
     }
 }
