@@ -26,6 +26,6 @@ jobs:
         provider: heroku
         api_key: $HEROKU_API_KEY
         app: eat-it-users-app
-        on:
-          all_branches: true
-          condition: $TRAVIS_BRANCH =~ ^(master|develop)$
+        #on:
+        #  all_branches: true
+        #  condition: $TRAVIS_BRANCH =~ ^(master|develop)$
