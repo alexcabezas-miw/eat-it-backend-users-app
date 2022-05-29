@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @Builder
-public class UserDTO {
+public class CreateUserDTO {
     private String id;
 
     @NotBlank(message = "Username can not be null or empty!")
