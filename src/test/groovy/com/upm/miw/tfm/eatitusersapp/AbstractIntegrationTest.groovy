@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 @ActiveProfiles("test")
 @AutoConfigureDataMongo
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AbstractIntegrationTest extends Specification {
 
     @Autowired
