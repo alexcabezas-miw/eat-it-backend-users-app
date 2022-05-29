@@ -12,6 +12,8 @@ cache:
 before_install:
   - chmod +x mvnw
 
+install: skip
+
 jobs:
   include:
     - stage: test
@@ -19,11 +21,11 @@ jobs:
     - stage: build
       script: ./mvnw clean install -B
     - stage: deploy to heroku
-      branches:
-        only:
-          - develop
-          - master
+      script: skip
       deploy:
         provider: heroku
         api_key: $HEROKU_API_KEY
         app: eat-it-users-app
+        on:
+          all_branches: true
+          condition: $TRAVIS_BRANCH =~ ^(master|develop)$
