@@ -1,0 +1,29 @@
+arch: amd64
+
+language: java
+
+jdk:
+  - oraclejdk11
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_install:
+  - chmod +x mvnw
+
+jobs:
+  include:
+    - stage: test
+      script: ./mvnw clean test -B
+    - stage: build
+      script: ./mvnw clean install -B
+    - stage: deploy to heroku
+      branches:
+        only:
+          - develop
+          - master
+      deploy:
+        provider: heroku
+        api_key: $HEROKU_API_KEY
+        app: eat-it-users-app
