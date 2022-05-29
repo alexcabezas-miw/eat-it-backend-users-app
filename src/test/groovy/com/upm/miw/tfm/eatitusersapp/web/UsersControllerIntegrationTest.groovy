@@ -12,7 +12,13 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
         expect:
         this.webTestClient.post()
                 .uri(UsersController.USERS_PATH + UsersController.CREATE_USERS_PATH)
-                .body(BodyInserters.fromValue(CreateUserInputDTO.builder().username("username").build()))
+                .body(BodyInserters.fromValue(CreateUserInputDTO.builder()
+                        .username("username")
+                        .age("24")
+                        .gender("Hombre")
+                        .nationality("España")
+                        .name("Alejandro Cabezas")
+                        .build()))
                 .exchange()
                 .expectStatus().isCreated()
     }
@@ -99,5 +105,37 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
                 .body(BodyInserters.fromValue(["ADMIN"]))
                 .exchange()
                 .expectStatus().isNoContent()
+    }
+
+    def "get user by username returns 404 if user does not exist" () {
+        expect:
+        this.webTestClient
+                .get()
+                .uri(UsersController.USERS_PATH + UsersController.GET_USER_BY_USERNAME_PATH + "/not_exist")
+                .exchange()
+                .expectStatus().isNotFound()
+    }
+
+    def "get user by username returns 200 and user if user exists" () {
+        when:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .build()
+        )
+
+        then:
+        this.webTestClient
+                .get()
+                .uri(UsersController.USERS_PATH + UsersController.GET_USER_BY_USERNAME_PATH + "/username")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ListUserDTO.class)
+                .value(user -> {
+                    user.getId() != ""
+                    user.getUsername() == "username"
+                })
     }
 }

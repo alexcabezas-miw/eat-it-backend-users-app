@@ -13,9 +13,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListUserDTO {
-    private String id;
 
     private String username;
+
+    private String name;
+
+    private String age;
+
+    private String gender;
+
+    private String nationality;
 
     private List<String> roles;
 }

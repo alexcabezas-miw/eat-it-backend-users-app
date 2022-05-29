@@ -10,4 +10,5 @@ public interface UsersService {
     CreateUserOutputDTO createUser(CreateUserInputDTO user);
     Collection<ListUserDTO> getAllUsers();
     void editRolesByUsername(String username, Collection<String> roles);
+    ListUserDTO findUserByUsername(String username);
 }
