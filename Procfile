@@ -1,1 +1,1 @@
-web: java -jar target/eatit-users-app-0.0.1-SNAPSHOT.jar -Djdk.tls.client.protocols=TLSv1.2
+web: java -jar -Dspring.profiles.active=prod target/eatit-users-app-0.0.1-SNAPSHOT.jar -Djdk.tls.client.protocols=TLSv1.2
