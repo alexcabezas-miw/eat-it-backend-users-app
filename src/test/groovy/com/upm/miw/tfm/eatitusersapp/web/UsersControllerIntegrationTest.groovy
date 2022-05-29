@@ -134,7 +134,6 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody(ListUserDTO.class)
                 .value(user -> {
-                    user.getId() != ""
                     user.getUsername() == "username"
                 })
     }
