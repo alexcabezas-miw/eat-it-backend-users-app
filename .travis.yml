@@ -21,7 +21,7 @@ jobs:
     - stage: build
       script: ./mvnw clean install -B
     - stage: deploy to heroku
-      script: skip
+      script: echo "Attempting to deploy on branch $TRAVIS_BRANCH"
       before_deploy:
         - rvm $(travis_internal_ruby) --fuzzy do ruby -S gem install faraday -v 1.8.0
       deploy:
@@ -30,4 +30,4 @@ jobs:
         app: eat-it-users-app
         on:
           all_branches: true
-        #  condition: $TRAVIS_BRANCH =~ ^(master|develop)$
+          condition: $TRAVIS_BRANCH =~ ^(master|develop)$
