@@ -74,4 +74,11 @@ public class UsersServiceImpl implements UsersService {
 
         this.usersRepository.save(user.get());
     }
+
+    @Override
+    public ListUserDTO findUserByUsername(String username) {
+        Optional<User> user = this.usersRepository.findByUsername(username);
+        return user.map(this.usersMapper::toLisUserDTO)
+                .orElseThrow(() -> new UserDoesNotExistValidationException(username));
+    }
 }

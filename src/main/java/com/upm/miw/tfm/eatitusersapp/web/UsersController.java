@@ -20,6 +20,7 @@ public class UsersController {
     public static final String CREATE_USERS_PATH = "";
     public static final String LIST_USERS_PATH = "";
     public static final String EDIT_ROLES_PATH = "/roles";
+    public static final String GET_USER_BY_USERNAME_PATH = "/";
 
 
     private final UsersService usersService;
@@ -56,5 +57,15 @@ public class UsersController {
                     .body(e.getMessage());
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(GET_USER_BY_USERNAME_PATH + "{username}")
+    public ResponseEntity<ListUserDTO> getUserByUsername(@PathVariable("username") String username) {
+        try {
+            ListUserDTO user = this.usersService.findUserByUsername(username);
+            return ResponseEntity.ok().body(user);
+        } catch (ValidationException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

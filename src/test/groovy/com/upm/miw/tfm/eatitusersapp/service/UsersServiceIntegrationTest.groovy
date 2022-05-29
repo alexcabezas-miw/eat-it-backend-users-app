@@ -100,4 +100,31 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         userOpt.isPresent()
         userOpt.get().getRoles().contains(Roles.ADMIN)
     }
+
+    def "get user by username throws validation exception when user does not exist" () {
+        when:
+        usersService.findUserByUsername("NOT_FOUND")
+
+        then:
+        thrown(UserDoesNotExistValidationException)
+    }
+
+    def "get user by username returns the user if the user exists" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .build()
+        )
+
+        when:
+        def result = usersService.findUserByUsername("username")
+
+        then:
+        noExceptionThrown()
+        result.getUsername() == "username"
+        result.getId() != ""
+    }
 }
