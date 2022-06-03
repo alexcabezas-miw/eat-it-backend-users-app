@@ -10,6 +10,7 @@ import com.upm.miw.tfm.eatitusersapp.service.model.User;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -22,6 +23,8 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final UsersMapper usersMapper;
+
+    private final static StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
 
     public UsersServiceImpl(UsersRepository usersRepository, UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
@@ -43,6 +46,7 @@ public class UsersServiceImpl implements UsersService {
         });
 
         User user = this.usersMapper.fromCreateUserInputDTO(createUserInputDTO);
+        user.setPassword(encryptor.encryptPassword(user.getPassword()));
         return this.usersMapper.toCreateUserOutputDTO(this.usersRepository.save(user));
     }
 

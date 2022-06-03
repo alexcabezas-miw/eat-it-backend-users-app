@@ -21,5 +21,6 @@ public class User {
     private String gender;
     private String nationality;
     private String username;
+    private String password;
     private List<Roles> roles;
 }
