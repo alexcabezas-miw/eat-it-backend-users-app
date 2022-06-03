@@ -18,6 +18,7 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
                         .gender("Hombre")
                         .nationality("España")
                         .name("Alejandro Cabezas")
+                        .password("password")
                         .build()))
                 .exchange()
                 .expectStatus().isCreated()
