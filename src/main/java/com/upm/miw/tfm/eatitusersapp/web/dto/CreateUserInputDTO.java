@@ -29,7 +29,4 @@ public class CreateUserInputDTO {
 
     @NotBlank(message = "password can not be null or empty!")
     private String password;
-
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();
 }

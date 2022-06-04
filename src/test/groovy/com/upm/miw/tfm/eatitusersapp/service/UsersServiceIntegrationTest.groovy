@@ -26,19 +26,6 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         savedUser.getId() != ""
     }
 
-    def "create user throws exception if roles not exist" () {
-        given:
-        CreateUserInputDTO dto = CreateUserInputDTO.builder()
-                .username("username")
-                .roles(["NOT_FOUND"]).build()
-
-        when:
-        usersService.createUser(dto)
-
-        then:
-        thrown(RoleDoesNotExistValidationException)
-    }
-
     def "create an already existing user throws an exception" () {
         given:
         CreateUserInputDTO dto = CreateUserInputDTO.builder()

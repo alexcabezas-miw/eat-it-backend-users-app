@@ -38,13 +38,6 @@ public class UsersServiceImpl implements UsersService {
             throw new UserAlreadyExistValidationException(createUserInputDTO.getUsername());
         }
 
-        List<String> roles = createUserInputDTO.getRoles();
-        roles.forEach(role -> {
-            if(!Roles.exist(role)) {
-                throw new RoleDoesNotExistValidationException(role);
-            }
-        });
-
         User user = this.usersMapper.fromCreateUserInputDTO(createUserInputDTO);
         user.setPassword(encryptor.encryptPassword(user.getPassword()));
         return this.usersMapper.toCreateUserOutputDTO(this.usersRepository.save(user));

@@ -24,20 +24,6 @@ class UsersMapperIntegrationTest extends AbstractIntegrationTest {
         listUserDTO.getUsername() == user.getUsername()
     }
 
-    def "conversion to entity from CreationDTO maps the roles correctly" () {
-        given:
-        CreateUserInputDTO userDTO = CreateUserInputDTO.builder()
-                .username("username")
-                .roles(["ROLE_ADMIN"]).build()
-
-        when:
-        User user = this.usersMapper.fromCreateUserInputDTO(userDTO)
-
-        then:
-        user.getRoles() != null
-        user.getRoles().contains(Roles.ROLE_ADMIN)
-    }
-
     def "conversion from user entity to createUserOutputDTO works correctly" () {
         given:
         User user = User.builder()
