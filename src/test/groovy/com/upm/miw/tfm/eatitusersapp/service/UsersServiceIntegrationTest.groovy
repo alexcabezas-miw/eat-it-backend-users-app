@@ -26,19 +26,6 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         savedUser.getId() != ""
     }
 
-    def "create user throws exception if roles not exist" () {
-        given:
-        CreateUserInputDTO dto = CreateUserInputDTO.builder()
-                .username("username")
-                .roles(["NOT_FOUND"]).build()
-
-        when:
-        usersService.createUser(dto)
-
-        then:
-        thrown(RoleDoesNotExistValidationException)
-    }
-
     def "create an already existing user throws an exception" () {
         given:
         CreateUserInputDTO dto = CreateUserInputDTO.builder()
@@ -93,12 +80,12 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         usersRepository.save(User.builder().username("FOUND").build())
 
         when:
-        usersService.editRolesByUsername("FOUND", ["ADMIN"])
+        usersService.editRolesByUsername("FOUND", ["ROLE_ADMIN"])
         def userOpt = usersRepository.findByUsername("FOUND")
 
         then:
         userOpt.isPresent()
-        userOpt.get().getRoles().contains(Roles.ADMIN)
+        userOpt.get().getRoles().contains(Roles.ROLE_ADMIN)
     }
 
     def "get user by username throws validation exception when user does not exist" () {
@@ -125,5 +112,31 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         then:
         noExceptionThrown()
         result.getUsername() == "username"
+    }
+
+    def "get roles returns the roles of the user" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .roles([Roles.ROLE_ADMIN])
+                .build()
+        )
+
+        when:
+        def roles = usersService.getRolesByUsername("username")
+
+        then:
+        roles.size() == 1
+    }
+
+    def "get roles returns empty if user was not found" () {
+        when:
+        def roles = usersService.getRolesByUsername("username")
+
+        then:
+        roles.isEmpty()
     }
 }

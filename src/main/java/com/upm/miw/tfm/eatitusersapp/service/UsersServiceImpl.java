@@ -10,9 +10,12 @@ import com.upm.miw.tfm.eatitusersapp.service.model.User;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
+import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +25,8 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final UsersMapper usersMapper;
+
+    private final static StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
 
     public UsersServiceImpl(UsersRepository usersRepository, UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
@@ -35,14 +40,8 @@ public class UsersServiceImpl implements UsersService {
             throw new UserAlreadyExistValidationException(createUserInputDTO.getUsername());
         }
 
-        List<String> roles = createUserInputDTO.getRoles();
-        roles.forEach(role -> {
-            if(!Roles.exist(role)) {
-                throw new RoleDoesNotExistValidationException(role);
-            }
-        });
-
         User user = this.usersMapper.fromCreateUserInputDTO(createUserInputDTO);
+        user.setPassword(encryptor.encryptPassword(user.getPassword()));
         return this.usersMapper.toCreateUserOutputDTO(this.usersRepository.save(user));
     }
 
@@ -76,9 +75,20 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    @Cacheable("usersByUsername")
     public ListUserDTO findUserByUsername(String username) {
         Optional<User> user = this.usersRepository.findByUsername(username);
         return user.map(this.usersMapper::toLisUserDTO)
                 .orElseThrow(() -> new UserDoesNotExistValidationException(username));
+    }
+
+    @Override
+    @Cacheable("roles")
+    public Collection<Roles> getRolesByUsername(String username) {
+        Optional<User> user = this.usersRepository.findByUsername(username);
+        if(user.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return user.get().getRoles();
     }
 }

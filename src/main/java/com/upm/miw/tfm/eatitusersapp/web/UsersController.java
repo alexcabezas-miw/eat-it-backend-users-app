@@ -1,11 +1,17 @@
 package com.upm.miw.tfm.eatitusersapp.web;
 
+import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationException;
 import com.upm.miw.tfm.eatitusersapp.exception.ValidationException;
 import com.upm.miw.tfm.eatitusersapp.service.UsersService;
+import com.upm.miw.tfm.eatitusersapp.service.model.Roles;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,6 +36,7 @@ public class UsersController {
     }
 
     @PostMapping(CREATE_USERS_PATH)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER_CREATOR')")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserInputDTO createUserInputDTO) {
         try {
             CreateUserOutputDTO createdUser = this.usersService.createUser(createUserInputDTO);
@@ -43,11 +50,13 @@ public class UsersController {
     }
 
     @GetMapping(LIST_USERS_PATH)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Collection<ListUserDTO>> getUsers() {
         return ResponseEntity.ok().body(this.usersService.getAllUsers());
     }
 
     @PutMapping(EDIT_ROLES_PATH + "/{username}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> editRolesOfUser(@PathVariable("username") String username,
                                              @RequestBody Collection<String> roles) {
         try {
@@ -60,8 +69,15 @@ public class UsersController {
     }
 
     @GetMapping(GET_USER_BY_USERNAME_PATH + "{username}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DEFAULT_USER')")
     public ResponseEntity<ListUserDTO> getUserByUsername(@PathVariable("username") String username) {
         try {
+            UserDetails integrationUser = (UserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal();
+            if(!integrationUser.getUsername().equals(username)
+                    && !integrationUser.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ROLE_ADMIN.name()))) {
+                throw new UnauthorizedOperationValidationException();
+            }
             ListUserDTO user = this.usersService.findUserByUsername(username);
             return ResponseEntity.ok().body(user);
         } catch (ValidationException e) {

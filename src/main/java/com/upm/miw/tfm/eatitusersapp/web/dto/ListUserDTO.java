@@ -23,6 +23,4 @@ public class ListUserDTO {
     private String gender;
 
     private String nationality;
-
-    private List<String> roles;
 }

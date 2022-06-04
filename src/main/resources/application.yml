@@ -1,3 +1,7 @@
+eat-it:
+  auth:
+    url: http://localhost:8082
+
 spring:
   data:
     mongodb:
