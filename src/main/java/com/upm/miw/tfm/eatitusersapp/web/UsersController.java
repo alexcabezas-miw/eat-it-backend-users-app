@@ -36,7 +36,7 @@ public class UsersController {
     }
 
     @PostMapping(CREATE_USERS_PATH)
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER_CREATOR')")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserInputDTO createUserInputDTO) {
         try {
             CreateUserOutputDTO createdUser = this.usersService.createUser(createUserInputDTO);

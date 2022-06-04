@@ -22,5 +22,7 @@ public class User {
     private String nationality;
     private String username;
     private String password;
-    private List<Roles> roles;
+
+    @Builder.Default
+    private List<Roles> roles = List.of(Roles.ROLE_DEFAULT_USER);
 }

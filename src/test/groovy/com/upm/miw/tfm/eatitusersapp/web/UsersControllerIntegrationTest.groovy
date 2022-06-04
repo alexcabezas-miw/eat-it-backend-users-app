@@ -35,7 +35,26 @@ class UsersControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @WithMockUser(username = "admin", roles = ["DEFAULT_USER"])
-    def "Create a user works successfully when user does not exist and user is default" () {
+    def "Create a user throw exception when user is default" () {
+        given:
+        CreateUserInputDTO userInputDTO = CreateUserInputDTO.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .name("Alejandro Cabezas")
+                .password("password")
+                .build()
+
+        when:
+        this.usersController.createUser(userInputDTO)
+
+        then:
+        thrown(AccessDeniedException)
+    }
+
+    @WithMockUser(username = "admin", roles = ["USER_CREATOR"])
+    def "Create a user works successfully when user does not exist and user is user creator" () {
         given:
         CreateUserInputDTO userInputDTO = CreateUserInputDTO.builder()
                 .username("username")
