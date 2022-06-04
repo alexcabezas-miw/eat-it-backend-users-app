@@ -11,9 +11,11 @@ import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -73,9 +75,20 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    @Cacheable("usersByUsername")
     public ListUserDTO findUserByUsername(String username) {
         Optional<User> user = this.usersRepository.findByUsername(username);
         return user.map(this.usersMapper::toLisUserDTO)
                 .orElseThrow(() -> new UserDoesNotExistValidationException(username));
+    }
+
+    @Override
+    @Cacheable("roles")
+    public Collection<Roles> getRolesByUsername(String username) {
+        Optional<User> user = this.usersRepository.findByUsername(username);
+        if(user.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return user.get().getRoles();
     }
 }

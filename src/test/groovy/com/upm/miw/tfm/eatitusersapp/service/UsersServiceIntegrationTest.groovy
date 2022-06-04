@@ -113,4 +113,30 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         noExceptionThrown()
         result.getUsername() == "username"
     }
+
+    def "get roles returns the roles of the user" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .roles([Roles.ROLE_ADMIN])
+                .build()
+        )
+
+        when:
+        def roles = usersService.getRolesByUsername("username")
+
+        then:
+        roles.size() == 1
+    }
+
+    def "get roles returns empty if user was not found" () {
+        when:
+        def roles = usersService.getRolesByUsername("username")
+
+        then:
+        roles.isEmpty()
+    }
 }

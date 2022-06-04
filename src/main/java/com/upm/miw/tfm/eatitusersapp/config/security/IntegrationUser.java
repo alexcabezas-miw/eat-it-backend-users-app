@@ -1,6 +1,9 @@
 package com.upm.miw.tfm.eatitusersapp.config.security;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,15 +13,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class IntegrationUser implements UserDetails {
 
     private String username;
     private String password;
     private List<String> roles;
-
-    public List<String> getRoles() {
-        return this.roles;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
