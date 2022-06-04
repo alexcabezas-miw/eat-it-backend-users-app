@@ -93,12 +93,12 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         usersRepository.save(User.builder().username("FOUND").build())
 
         when:
-        usersService.editRolesByUsername("FOUND", ["ADMIN"])
+        usersService.editRolesByUsername("FOUND", ["ROLE_ADMIN"])
         def userOpt = usersRepository.findByUsername("FOUND")
 
         then:
         userOpt.isPresent()
-        userOpt.get().getRoles().contains(Roles.ADMIN)
+        userOpt.get().getRoles().contains(Roles.ROLE_ADMIN)
     }
 
     def "get user by username throws validation exception when user does not exist" () {

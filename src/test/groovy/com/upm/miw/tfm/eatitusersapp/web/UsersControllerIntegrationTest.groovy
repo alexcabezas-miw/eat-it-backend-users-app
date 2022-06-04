@@ -4,6 +4,7 @@ import com.upm.miw.tfm.eatitusersapp.AbstractWebIntegrationTest
 import com.upm.miw.tfm.eatitusersapp.service.model.User
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.web.reactive.function.BodyInserters
 
 class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
@@ -103,7 +104,7 @@ class UsersControllerIntegrationTest extends AbstractWebIntegrationTest {
         this.webTestClient
                 .put()
                 .uri(UsersController.USERS_PATH + UsersController.EDIT_ROLES_PATH + "/username")
-                .body(BodyInserters.fromValue(["ADMIN"]))
+                .body(BodyInserters.fromValue(["ROLE_ADMIN"]))
                 .exchange()
                 .expectStatus().isNoContent()
     }

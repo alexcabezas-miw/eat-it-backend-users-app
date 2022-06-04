@@ -28,29 +28,14 @@ class UsersMapperIntegrationTest extends AbstractIntegrationTest {
         given:
         CreateUserInputDTO userDTO = CreateUserInputDTO.builder()
                 .username("username")
-                .roles(["ADMIN"]).build()
+                .roles(["ROLE_ADMIN"]).build()
 
         when:
         User user = this.usersMapper.fromCreateUserInputDTO(userDTO)
 
         then:
         user.getRoles() != null
-        user.getRoles().contains(Roles.ADMIN)
-    }
-
-    def "conversion to ListUserDTO from user entity maps the roles correctly" () {
-        given:
-        User user = User.builder()
-                .username("username")
-                .id("id")
-                .roles([Roles.ADMIN, Roles.DEFAULT_USER]).build()
-
-        when:
-        def userDTO = this.usersMapper.toLisUserDTO(user)
-
-        then:
-        userDTO.getRoles() != null
-        userDTO.getRoles().containsAll(["ADMIN", "DEFAULT_USER"])
+        user.getRoles().contains(Roles.ROLE_ADMIN)
     }
 
     def "conversion from user entity to createUserOutputDTO works correctly" () {
@@ -58,7 +43,7 @@ class UsersMapperIntegrationTest extends AbstractIntegrationTest {
         User user = User.builder()
                 .username("username")
                 .id("id")
-                .roles([Roles.ADMIN, Roles.DEFAULT_USER]).build()
+                .roles([Roles.ROLE_ADMIN, Roles.ROLE_DEFAULT_USER]).build()
 
         when:
         def userDTO = this.usersMapper.toCreateUserOutputDTO(user)

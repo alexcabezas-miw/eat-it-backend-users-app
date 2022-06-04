@@ -16,6 +16,10 @@ public class IntegrationUser implements UserDetails {
     private String password;
     private List<String> roles;
 
+    public List<String> getRoles() {
+        return this.roles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()

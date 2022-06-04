@@ -3,6 +3,7 @@ package com.upm.miw.tfm.eatitusersapp.config.security;
 import com.upm.miw.tfm.eatitusersapp.service.auth.AuthenticationClient;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component

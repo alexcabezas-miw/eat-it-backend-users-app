@@ -6,6 +6,9 @@ import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,6 +33,7 @@ public class UsersController {
     }
 
     @PostMapping(CREATE_USERS_PATH)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DEFAULT_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserInputDTO createUserInputDTO) {
         try {
             CreateUserOutputDTO createdUser = this.usersService.createUser(createUserInputDTO);
@@ -43,11 +47,13 @@ public class UsersController {
     }
 
     @GetMapping(LIST_USERS_PATH)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Collection<ListUserDTO>> getUsers() {
         return ResponseEntity.ok().body(this.usersService.getAllUsers());
     }
 
     @PutMapping(EDIT_ROLES_PATH + "/{username}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> editRolesOfUser(@PathVariable("username") String username,
                                              @RequestBody Collection<String> roles) {
         try {
@@ -60,6 +66,7 @@ public class UsersController {
     }
 
     @GetMapping(GET_USER_BY_USERNAME_PATH + "{username}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DEFAULT_USER')")
     public ResponseEntity<ListUserDTO> getUserByUsername(@PathVariable("username") String username) {
         try {
             ListUserDTO user = this.usersService.findUserByUsername(username);
