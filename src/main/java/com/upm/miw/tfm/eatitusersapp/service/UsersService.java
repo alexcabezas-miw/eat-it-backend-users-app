@@ -12,5 +12,5 @@ public interface UsersService {
     Collection<ListUserDTO> getAllUsers();
     void editRolesByUsername(String username, Collection<String> roles);
     ListUserDTO findUserByUsername(String username);
-    Collection<Roles> getRolesByUsername(String username);
+    Collection<String> getRolesByUsername(String username);
 }

@@ -1,6 +1,7 @@
 package com.upm.miw.tfm.eatitusersapp.web
 
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
+import com.upm.miw.tfm.eatitusersapp.service.model.Roles
 import com.upm.miw.tfm.eatitusersapp.service.model.User
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
 import org.springframework.beans.factory.annotation.Autowired
@@ -247,5 +248,64 @@ class UsersControllerIntegrationTest extends AbstractIntegrationTest {
 
         then:
         thrown(AccessDeniedException)
+    }
+
+    @WithMockUser(username = "username", roles = ["DEFAULT_USER"])
+    def "get roles by username returns roles if authenticated user is the same as the requested username" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .name("Alex")
+                .roles([Roles.ROLE_DEFAULT_USER])
+                .build())
+
+        when:
+        def roles = usersController.getRolesByUsername("username")
+
+        then:
+        roles.getStatusCode() == HttpStatus.OK
+        roles.getBody().size() == 1
+    }
+
+    @WithMockUser(username = "acabezas", roles = ["ADMIN"])
+    def "get roles by username returns roles if authenticated user is admin" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .name("Alex")
+                .roles([Roles.ROLE_DEFAULT_USER])
+                .build())
+
+        when:
+        def roles = usersController.getRolesByUsername("username")
+
+        then:
+        roles.getStatusCode() == HttpStatus.OK
+        roles.getBody().size() == 1
+    }
+
+    @WithMockUser(username = "rcabrera", roles = ["DEFAULT_USER"])
+    def "get roles by username returns empty if authenticated user is not admin" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .name("Alex")
+                .roles([Roles.ROLE_DEFAULT_USER])
+                .build())
+
+        when:
+        def roles = usersController.getRolesByUsername("username")
+
+        then:
+        roles.getStatusCode() == HttpStatus.NOT_FOUND
     }
 }

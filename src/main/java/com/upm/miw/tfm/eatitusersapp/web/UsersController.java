@@ -27,6 +27,7 @@ public class UsersController {
     public static final String LIST_USERS_PATH = "";
     public static final String EDIT_ROLES_PATH = "/roles";
     public static final String GET_USER_BY_USERNAME_PATH = "/";
+    public static final String GET_USER_ROLES = "/roles";
 
 
     private final UsersService usersService;
@@ -80,6 +81,22 @@ public class UsersController {
             }
             ListUserDTO user = this.usersService.findUserByUsername(username);
             return ResponseEntity.ok().body(user);
+        } catch (ValidationException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping(GET_USER_ROLES + "/" + "{username}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DEFAULT_USER')")
+    public ResponseEntity<Collection<String>> getRolesByUsername(@PathVariable("username") String username) {
+        try {
+            UserDetails integrationUser = (UserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal();
+            if(!integrationUser.getUsername().equals(username)
+                    && !integrationUser.getAuthorities().contains(new SimpleGrantedAuthority(Roles.ROLE_ADMIN.name()))) {
+                throw new UnauthorizedOperationValidationException();
+            }
+            return ResponseEntity.ok().body(this.usersService.getRolesByUsername(username));
         } catch (ValidationException e) {
             return ResponseEntity.notFound().build();
         }

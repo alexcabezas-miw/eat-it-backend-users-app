@@ -84,11 +84,13 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @Cacheable("roles")
-    public Collection<Roles> getRolesByUsername(String username) {
+    public Collection<String> getRolesByUsername(String username) {
         Optional<User> user = this.usersRepository.findByUsername(username);
         if(user.isEmpty()) {
             return Collections.emptyList();
         }
-        return user.get().getRoles();
+        return user.get().getRoles()
+                .stream()
+                .map(Roles::name).collect(Collectors.toList());
     }
 }
