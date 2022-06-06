@@ -308,4 +308,42 @@ class UsersControllerIntegrationTest extends AbstractIntegrationTest {
         then:
         roles.getStatusCode() == HttpStatus.NOT_FOUND
     }
+
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    def "remove user by username deletes the username and returns 204 if user exists and user is admin" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .name("Alex")
+                .roles([Roles.ROLE_DEFAULT_USER])
+                .build())
+
+        when:
+        def response = usersController.removeUserByUsername("username")
+
+        then:
+        response.getStatusCode() == HttpStatus.NO_CONTENT
+        usersRepository.findAll().isEmpty()
+    }
+
+    @WithMockUser(username = "admin", roles = ["ADMIN"])
+    def "remove user by username returns 400 if user does not exists and user is admin" () {
+        when:
+        def response = usersController.removeUserByUsername("username")
+
+        then:
+        response.getStatusCode() == HttpStatus.BAD_REQUEST
+    }
+
+    @WithMockUser(username = "user", roles = ["DEFAULT_USER"])
+    def "remove user by username throws exception if user is not admin" () {
+        when:
+        usersController.removeUserByUsername("username")
+
+        then:
+        thrown(AccessDeniedException)
+    }
 }

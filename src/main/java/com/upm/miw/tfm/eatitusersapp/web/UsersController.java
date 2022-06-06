@@ -28,6 +28,7 @@ public class UsersController {
     public static final String EDIT_ROLES_PATH = "/roles";
     public static final String GET_USER_BY_USERNAME_PATH = "/";
     public static final String GET_USER_ROLES = "/roles";
+    public static final String DELETE_USER_BY_USERNAME_PATH = "";
 
 
     private final UsersService usersService;
@@ -99,6 +100,17 @@ public class UsersController {
             return ResponseEntity.ok().body(this.usersService.getRolesByUsername(username));
         } catch (ValidationException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping(DELETE_USER_BY_USERNAME_PATH + "/" + "{username}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> removeUserByUsername(@PathVariable("username") String username) {
+        try {
+            this.usersService.removeUserByUsername(username);
+            return ResponseEntity.noContent().build();
+        } catch (ValidationException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
