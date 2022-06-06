@@ -93,4 +93,13 @@ public class UsersServiceImpl implements UsersService {
                 .stream()
                 .map(Roles::name).collect(Collectors.toList());
     }
+
+    @Override
+    public void removeUserByUsername(String username) {
+        Optional<User> user = this.usersRepository.findByUsername(username);
+        if(user.isEmpty()) {
+            throw new UserDoesNotExistValidationException(username);
+        }
+        this.usersRepository.delete(user.get());
+    }
 }

@@ -139,4 +139,30 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
         then:
         roles.isEmpty()
     }
+
+    def "remove user by username removes the user" () {
+        given:
+        usersRepository.save(User.builder()
+                .username("username")
+                .age("24")
+                .gender("Hombre")
+                .nationality("España")
+                .roles([Roles.ROLE_ADMIN])
+                .build()
+        )
+
+        when:
+        usersService.removeUserByUsername("username")
+
+        then:
+        usersRepository.findAll().isEmpty()
+    }
+
+    def "remove user by username throws exception if user was not found" () {
+        when:
+        usersService.removeUserByUsername("username")
+
+        then:
+        thrown(UserDoesNotExistValidationException)
+    }
 }
