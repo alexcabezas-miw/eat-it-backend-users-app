@@ -29,4 +29,8 @@ public class CreateUserInputDTO {
 
     @NotBlank(message = "password can not be null or empty!")
     private String password;
+
+    private List<String> restrictedIngredients;
+
+    private List<String> restrictions;
 }
