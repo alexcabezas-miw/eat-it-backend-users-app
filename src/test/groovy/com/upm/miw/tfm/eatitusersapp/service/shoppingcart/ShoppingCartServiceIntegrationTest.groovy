@@ -89,4 +89,23 @@ class ShoppingCartServiceIntegrationTest extends AbstractIntegrationTest {
         then:
         thrown(ShoppingCartNotFoundValidationException)
     }
+
+    def "clean shopping cart deletes all items when shopping cart exists by username" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas").products(["barcode1"] as HashSet).build())
+
+        when:
+        this.shoppingCartService.cleanShoppingCart("acabezas")
+
+        then:
+        this.shoppingCartRepository.findById("acabezas").get().getProducts().isEmpty()
+    }
+
+    def "clean shopping cart throws exception when shopping cart does not exists by username" () {
+        when:
+        this.shoppingCartService.cleanShoppingCart("acabezas")
+
+        then:
+        thrown(ShoppingCartNotFoundValidationException)
+    }
 }

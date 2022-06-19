@@ -7,4 +7,5 @@ import java.util.Collection;
 public interface ShoppingCartService {
     void addProductToShoppingCart(String username, String productBarcode);
     Collection<ProductDTO> getShoppingCartItems(String username);
+    void cleanShoppingCart(String username);
 }
