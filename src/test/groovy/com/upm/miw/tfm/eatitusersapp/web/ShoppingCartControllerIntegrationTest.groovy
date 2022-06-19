@@ -69,12 +69,13 @@ class ShoppingCartControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @WithMockUser(username = "acabezas")
-    def "list item from product cart returns 404 when shopping cart was not found by username" () {
+    def "list item from product cart returns 200 and empty list when shopping cart was not found by username" () {
         when:
         def response = shoppingCartController.getShoppingCartItems()
 
         then:
-        response.getStatusCode() == HttpStatus.NOT_FOUND
+        response.getStatusCode() == HttpStatus.OK
+        response.getBody().isEmpty()
     }
 
     def "list item from product cart throws error user is not authenticated" () {
