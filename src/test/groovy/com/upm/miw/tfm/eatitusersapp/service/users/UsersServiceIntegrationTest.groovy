@@ -1,4 +1,4 @@
-package com.upm.miw.tfm.eatitusersapp.service
+package com.upm.miw.tfm.eatitusersapp.service.users
 
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
 import com.upm.miw.tfm.eatitusersapp.exception.RoleDoesNotExistValidationException
@@ -6,6 +6,7 @@ import com.upm.miw.tfm.eatitusersapp.exception.UserAlreadyExistValidationExcepti
 import com.upm.miw.tfm.eatitusersapp.exception.UserDoesNotExistValidationException
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles
 import com.upm.miw.tfm.eatitusersapp.service.model.User
+import com.upm.miw.tfm.eatitusersapp.service.users.UsersService
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
 import org.springframework.beans.factory.annotation.Autowired
 

@@ -1,6 +1,8 @@
 eat-it:
   auth:
     url: https://eat-it-auth-app.herokuapp.com
+  products:
+    url: https://eat-it-products-app.herokuapp.com
 
 spring:
   data:

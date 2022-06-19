@@ -2,7 +2,7 @@ package com.upm.miw.tfm.eatitusersapp.web;
 
 import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationException;
 import com.upm.miw.tfm.eatitusersapp.exception.ValidationException;
-import com.upm.miw.tfm.eatitusersapp.service.UsersService;
+import com.upm.miw.tfm.eatitusersapp.service.users.UsersService;
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;

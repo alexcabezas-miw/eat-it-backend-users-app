@@ -1,4 +1,4 @@
-package com.upm.miw.tfm.eatitusersapp.service;
+package com.upm.miw.tfm.eatitusersapp.service.users;
 
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;

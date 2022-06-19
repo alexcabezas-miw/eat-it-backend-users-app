@@ -1,6 +1,8 @@
 eat-it:
   auth:
     url: http://localhost:8082
+  products:
+    url: http://localhost:8081
 
 spring:
   data:
