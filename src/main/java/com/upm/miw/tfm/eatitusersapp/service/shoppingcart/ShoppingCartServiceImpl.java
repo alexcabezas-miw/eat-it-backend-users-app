@@ -46,4 +46,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                         .map(prod -> ProductDTO.builder().barcode(prod).build()).collect(Collectors.toList()))
                 .orElseThrow(() -> new ShoppingCartNotFoundValidationException(username));
     }
+
+    @Override
+    public void cleanShoppingCart(String username) {
+        ShoppingCart shoppingCart = this.shoppingCartRepository.findById(username)
+                .orElseThrow(() -> new ShoppingCartNotFoundValidationException(username));
+        shoppingCart.getProducts().clear();
+        this.shoppingCartRepository.save(shoppingCart);
+    }
 }

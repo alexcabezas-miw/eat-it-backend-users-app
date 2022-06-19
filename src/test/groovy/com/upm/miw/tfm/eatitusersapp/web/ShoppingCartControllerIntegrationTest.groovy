@@ -84,4 +84,34 @@ class ShoppingCartControllerIntegrationTest extends AbstractIntegrationTest {
         then:
         thrown(AuthenticationCredentialsNotFoundException)
     }
+
+    @WithMockUser(username = "acabezas")
+    def "clean shopping cart removes all items of user shopping cart and returns 201 when user is authenticated and shopping cart exists by username" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas").products(["barcode1"] as HashSet).build())
+
+        when:
+        def response = shoppingCartController.cleanShoppingCartItems()
+
+        then:
+        response.getStatusCode() == HttpStatus.NO_CONTENT
+        this.shoppingCartRepository.findById("acabezas").get().getProducts().isEmpty()
+    }
+
+    @WithMockUser(username = "acabezas")
+    def "clean shopping cart returns 404 when user is authenticated but shopping cart does not exists by username" () {
+        when:
+        def response = shoppingCartController.cleanShoppingCartItems()
+
+        then:
+        response.getStatusCode() == HttpStatus.NOT_FOUND
+    }
+
+    def "clean shopping cart throws exception when user is not authenticated" () {
+        when:
+        shoppingCartController.cleanShoppingCartItems()
+
+        then:
+        thrown(AuthenticationCredentialsNotFoundException)
+    }
 }
