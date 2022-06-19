@@ -9,6 +9,7 @@ import com.upm.miw.tfm.eatitusersapp.web.dto.ProductDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Optional<ShoppingCart> shoppingCart = this.shoppingCartRepository.findById(username);
         return shoppingCart.map(cart -> cart.getProducts().stream()
                         .map(prod -> ProductDTO.builder().barcode(prod).build()).collect(Collectors.toList()))
-                .orElseThrow(() -> new ShoppingCartNotFoundValidationException(username));
+                .orElse(Collections.emptyList());
     }
 
     @Override
