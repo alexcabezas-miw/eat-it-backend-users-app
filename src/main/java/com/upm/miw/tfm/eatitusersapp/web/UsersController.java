@@ -4,9 +4,7 @@ import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationEx
 import com.upm.miw.tfm.eatitusersapp.exception.ValidationException;
 import com.upm.miw.tfm.eatitusersapp.service.users.UsersService;
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
+import com.upm.miw.tfm.eatitusersapp.web.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,6 +27,7 @@ public class UsersController {
     public static final String GET_USER_BY_USERNAME_PATH = "/";
     public static final String GET_USER_ROLES = "/roles";
     public static final String DELETE_USER_BY_USERNAME_PATH = "";
+    public static final String CAN_EAT_PRODUCT_PATH = "/eatit";
 
 
     private final UsersService usersService;
@@ -111,6 +110,18 @@ public class UsersController {
             return ResponseEntity.noContent().build();
         } catch (ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping(CAN_EAT_PRODUCT_PATH)
+    @PreAuthorize("hasAnyRole('ROLE_DEFAULT_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<ProductToleranceResponseDTO> userCanEatProduct(@RequestBody ProductToleranceInputDTO inputDTO) {
+        try {
+            String username = ((UserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()).getUsername();
+            return ResponseEntity.ok(this.usersService.userTolerateIngredients(username, inputDTO));
+        } catch (ValidationException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

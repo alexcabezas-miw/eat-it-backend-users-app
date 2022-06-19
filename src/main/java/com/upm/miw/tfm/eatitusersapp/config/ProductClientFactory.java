@@ -4,6 +4,7 @@ import com.upm.miw.tfm.eatitusersapp.config.properties.ProductClientProperties;
 import com.upm.miw.tfm.eatitusersapp.service.client.product.ProductClient;
 import feign.Feign;
 import feign.auth.BasicAuthRequestInterceptor;
+import feign.codec.ErrorDecoder;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.okhttp.OkHttpClient;

@@ -4,12 +4,11 @@ import com.upm.miw.tfm.eatitusersapp.exception.RoleDoesNotExistValidationExcepti
 import com.upm.miw.tfm.eatitusersapp.exception.UserAlreadyExistValidationException;
 import com.upm.miw.tfm.eatitusersapp.exception.UserDoesNotExistValidationException;
 import com.upm.miw.tfm.eatitusersapp.repository.UsersRepository;
+import com.upm.miw.tfm.eatitusersapp.service.client.product.ProductClientFacade;
 import com.upm.miw.tfm.eatitusersapp.service.mapper.UsersMapper;
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles;
 import com.upm.miw.tfm.eatitusersapp.service.model.User;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
+import com.upm.miw.tfm.eatitusersapp.web.dto.*;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,18 +18,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UsersServiceImpl implements UsersService {
 
     private final UsersRepository usersRepository;
     private final UsersMapper usersMapper;
+    private final ProductClientFacade productClientFacade;
 
     private final static StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
 
-    public UsersServiceImpl(UsersRepository usersRepository, UsersMapper usersMapper) {
+    public UsersServiceImpl(UsersRepository usersRepository,
+                            UsersMapper usersMapper,
+                            ProductClientFacade productClientFacade) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
+        this.productClientFacade = productClientFacade;
     }
 
     @Override
@@ -101,5 +105,31 @@ public class UsersServiceImpl implements UsersService {
             throw new UserDoesNotExistValidationException(username);
         }
         this.usersRepository.delete(user.get());
+    }
+
+    @Override
+    public ProductToleranceResponseDTO userTolerateIngredients(String username, ProductToleranceInputDTO toleranceInputDTO) {
+        User user = this.usersRepository.findByUsername(username)
+                .orElseThrow(() -> new UserDoesNotExistValidationException(username));
+
+        Collection<String> combinedRestrictedIngredients = getCombinedRestrictedIngredients(user);
+        List<String> blockingIngredients = toleranceInputDTO.getIngredients().stream()
+                .filter(combinedRestrictedIngredients::contains).collect(Collectors.toList());
+
+        if(blockingIngredients.isEmpty()) {
+            return ProductToleranceResponseDTO.valid();
+        }
+        return ProductToleranceResponseDTO.invalid(blockingIngredients);
+    }
+
+    Collection<String> getCombinedRestrictedIngredients(User user) {
+        List<String> restrictions = user.getRestrictions() == null ? Collections.emptyList() : user.getRestrictions();
+        List<String> userIngredients = user.getRestrictedIngredients() == null ? Collections.emptyList() : user.getRestrictedIngredients();
+        Stream<String> ingredientsFromRestrictionsStream = restrictions.stream()
+                .flatMap(restriction -> this.productClientFacade.getRestrictionIngredients(restriction).stream())
+                .distinct();
+
+        return Stream.concat(ingredientsFromRestrictionsStream, userIngredients.stream()).distinct()
+                .collect(Collectors.toList());
     }
 }
