@@ -21,7 +21,9 @@ public class ProductClientFacade {
     public boolean productExists(String barcode) {
         ProductClient productClient = getProductClient(getCredentials());
         Response product = productClient.findByBarcode(barcode);
-        return product.status() == HttpStatus.OK.value();
+        boolean exists = product.status() == HttpStatus.OK.value();
+        product.close();
+        return exists;
     }
 
     private UserDetails getCredentials() {
