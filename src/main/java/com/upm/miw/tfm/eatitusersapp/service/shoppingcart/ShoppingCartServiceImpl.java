@@ -5,9 +5,12 @@ import com.upm.miw.tfm.eatitusersapp.exception.UnableToAddProductToCartValidatio
 import com.upm.miw.tfm.eatitusersapp.repository.ShoppingCartRepository;
 import com.upm.miw.tfm.eatitusersapp.service.client.product.ProductClientFacade;
 import com.upm.miw.tfm.eatitusersapp.service.model.ShoppingCart;
+import com.upm.miw.tfm.eatitusersapp.web.dto.ProductDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ShoppingCartServiceImpl implements ShoppingCartService {
@@ -34,5 +37,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         shoppingCart.get().getProducts().add(productBarcode);
         this.shoppingCartRepository.save(shoppingCart.get());
+    }
+
+    @Override
+    public Collection<ProductDTO> getShoppingCartItems(String username) {
+        Optional<ShoppingCart> shoppingCart = this.shoppingCartRepository.findById(username);
+        return shoppingCart.map(cart -> cart.getProducts().stream()
+                        .map(prod -> ProductDTO.builder().barcode(prod).build()).collect(Collectors.toList()))
+                .orElseThrow(() -> new ShoppingCartNotFoundValidationException(username));
     }
 }

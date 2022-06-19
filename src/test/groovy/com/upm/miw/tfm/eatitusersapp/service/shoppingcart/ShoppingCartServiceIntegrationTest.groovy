@@ -3,9 +3,11 @@ package com.upm.miw.tfm.eatitusersapp.service.shoppingcart
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
 import com.upm.miw.tfm.eatitusersapp.MockedProductClient
 import com.upm.miw.tfm.eatitusersapp.config.ProductClientFactory
+import com.upm.miw.tfm.eatitusersapp.exception.ShoppingCartNotFoundValidationException
 import com.upm.miw.tfm.eatitusersapp.exception.UnableToAddProductToCartValidationException
 import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationException
 import com.upm.miw.tfm.eatitusersapp.service.model.ShoppingCart
+import com.upm.miw.tfm.eatitusersapp.web.dto.ProductDTO
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
@@ -67,5 +69,24 @@ class ShoppingCartServiceIntegrationTest extends AbstractIntegrationTest {
 
         then:
         thrown(UnauthorizedOperationValidationException)
+    }
+
+    def "list items from product cart returns all items if shoppingcart exists" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas").products(["barcode1"] as HashSet).build())
+
+        when:
+        Collection<ProductDTO> products = shoppingCartService.getShoppingCartItems("acabezas")
+
+        then:
+        products.size() == 1
+    }
+
+    def "list items throws error when no shopping cart was found by username" () {
+        when:
+        shoppingCartService.getShoppingCartItems("username")
+
+        then:
+        thrown(ShoppingCartNotFoundValidationException)
     }
 }
