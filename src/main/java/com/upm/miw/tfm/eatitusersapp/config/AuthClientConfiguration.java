@@ -1,7 +1,7 @@
 package com.upm.miw.tfm.eatitusersapp.config;
 
 import com.upm.miw.tfm.eatitusersapp.config.properties.AuthClientProperties;
-import com.upm.miw.tfm.eatitusersapp.service.auth.AuthenticationClient;
+import com.upm.miw.tfm.eatitusersapp.service.client.auth.AuthenticationClient;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;

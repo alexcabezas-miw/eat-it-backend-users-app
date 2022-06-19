@@ -1,4 +1,4 @@
-package com.upm.miw.tfm.eatitusersapp.service.auth;
+package com.upm.miw.tfm.eatitusersapp.service.client.auth;
 
 import com.upm.miw.tfm.eatitusersapp.config.security.UserCredentialsDTO;
 import feign.Headers;
