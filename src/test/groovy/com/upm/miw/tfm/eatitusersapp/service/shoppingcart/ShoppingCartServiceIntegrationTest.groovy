@@ -108,4 +108,37 @@ class ShoppingCartServiceIntegrationTest extends AbstractIntegrationTest {
         then:
         thrown(ShoppingCartNotFoundValidationException)
     }
+
+    def "remove item from shopping cart deletes the item if the shopping cart exists by usrname" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas")
+                .products(["barcode1", "barcode2", "barcode3"] as HashSet).build())
+
+        when:
+        shoppingCartService.removeItemFromShoppingCart("acabezas", "barcode2")
+
+        then:
+        shoppingCartRepository.findById("acabezas").get().getProducts().size() == 2
+        shoppingCartRepository.findById("acabezas").get().getProducts().containsAll(["barcode1", "barcode3"])
+    }
+
+    def "remove item from shopping cart throws exception if shopping was not found by username" () {
+        when:
+        shoppingCartService.removeItemFromShoppingCart("acabezas", "barcode2")
+
+        then:
+        thrown(ShoppingCartNotFoundValidationException)
+    }
+
+    def "remove item from shopping cart does not remove anything if the shopping cart does not contain the product" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas")
+                .products(["barcode1", "barcode2", "barcode3"] as HashSet).build())
+
+        when:
+        shoppingCartService.removeItemFromShoppingCart("acabezas", "barcode4")
+
+        then:
+        shoppingCartRepository.findById("acabezas").get().getProducts().size() == 3
+    }
 }

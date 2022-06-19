@@ -114,4 +114,54 @@ class ShoppingCartControllerIntegrationTest extends AbstractIntegrationTest {
         then:
         thrown(AuthenticationCredentialsNotFoundException)
     }
+
+    @WithMockUser(username = "acabezas")
+    def "remove item from shopping cart removes the item and return 201 if user is authenticated and shopping cart was found by username" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas")
+                .products(["barcode1", "barcode2", "barcode3"] as HashSet).build())
+
+        when:
+        def response = shoppingCartController.removeItemFromShoppingCart("barcode2")
+
+        then:
+        response.getStatusCode() == HttpStatus.NO_CONTENT
+        this.shoppingCartRepository.findById("acabezas").get().getProducts().size() == 2
+        this.shoppingCartRepository.findById("acabezas").get().getProducts().containsAll(["barcode1", "barcode3"])
+    }
+
+    @WithMockUser(username = "acabezas")
+    def "remove item from shopping cart does not remove anything and return 201 if user is authenticated and shopping cart was found by username but item was not contained" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("acabezas")
+                .products(["barcode1", "barcode2", "barcode3"] as HashSet).build())
+
+        when:
+        def response = shoppingCartController.removeItemFromShoppingCart("barcode4")
+
+        then:
+        response.getStatusCode() == HttpStatus.NO_CONTENT
+        this.shoppingCartRepository.findById("acabezas").get().getProducts().size() == 3
+    }
+
+    @WithMockUser(username = "acabezas")
+    def "remove item from shopping cart returns 404 if shopping cart was not found by username" () {
+        given:
+        this.shoppingCartRepository.save(ShoppingCart.builder().username("username")
+                .products(["barcode1", "barcode2", "barcode3"] as HashSet).build())
+
+        when:
+        def response = shoppingCartController.removeItemFromShoppingCart("barcode2")
+
+        then:
+        response.getStatusCode() == HttpStatus.NOT_FOUND
+    }
+
+    def "remove item from shopping cart throws error if user is not authenticated" () {
+        when:
+        shoppingCartController.removeItemFromShoppingCart("barcode2")
+
+        then:
+        thrown(AuthenticationCredentialsNotFoundException)
+    }
 }

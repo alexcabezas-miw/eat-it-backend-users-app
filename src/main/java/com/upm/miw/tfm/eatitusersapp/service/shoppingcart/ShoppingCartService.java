@@ -8,4 +8,5 @@ public interface ShoppingCartService {
     void addProductToShoppingCart(String username, String productBarcode);
     Collection<ProductDTO> getShoppingCartItems(String username);
     void cleanShoppingCart(String username);
+    void removeItemFromShoppingCart(String username, String barcode);
 }
