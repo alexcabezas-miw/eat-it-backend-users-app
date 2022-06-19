@@ -84,10 +84,10 @@ class ShoppingCartServiceIntegrationTest extends AbstractIntegrationTest {
 
     def "list items throws error when no shopping cart was found by username" () {
         when:
-        shoppingCartService.getShoppingCartItems("username")
+        def list = shoppingCartService.getShoppingCartItems("username")
 
         then:
-        thrown(ShoppingCartNotFoundValidationException)
+        list.isEmpty()
     }
 
     def "clean shopping cart deletes all items when shopping cart exists by username" () {
