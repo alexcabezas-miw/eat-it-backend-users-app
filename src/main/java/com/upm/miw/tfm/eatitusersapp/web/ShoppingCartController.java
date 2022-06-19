@@ -18,6 +18,7 @@ public class ShoppingCartController {
     public static final String ADD_PRODUCT_TO_SHOPPING_CART = "/add/{barcode}";
     public static final String GET_SHOPPING_CART_PRODUCT_ITEMS = "/items";
     public static final String CLEAN_SHOPPING_CART_ITEMS = "/clean";
+    public static final String DELETE_ITEM_FROM_SHOPPING_CART = "/clean/{barcode}";
 
 
     private final ShoppingCartService shoppingCartService;
@@ -58,6 +59,19 @@ public class ShoppingCartController {
             String username = ((UserDetails) SecurityContextHolder.getContext()
                     .getAuthentication().getPrincipal()).getUsername();
             this.shoppingCartService.cleanShoppingCart(username);
+            return ResponseEntity.noContent().build();
+        } catch (ValidationException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping(DELETE_ITEM_FROM_SHOPPING_CART)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> removeItemFromShoppingCart(@PathVariable("barcode") String productBarcode) {
+        try {
+            String username = ((UserDetails) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()).getUsername();
+            this.shoppingCartService.removeItemFromShoppingCart(username, productBarcode);
             return ResponseEntity.noContent().build();
         } catch (ValidationException e) {
             return ResponseEntity.notFound().build();

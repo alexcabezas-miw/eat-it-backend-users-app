@@ -54,4 +54,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         shoppingCart.getProducts().clear();
         this.shoppingCartRepository.save(shoppingCart);
     }
+
+    @Override
+    public void removeItemFromShoppingCart(String username, String barcode) {
+        ShoppingCart shoppingCart = this.shoppingCartRepository.findById(username)
+                .orElseThrow(() -> new ShoppingCartNotFoundValidationException(username));
+        shoppingCart.getProducts().remove(barcode);
+        this.shoppingCartRepository.save(shoppingCart);
+    }
 }
