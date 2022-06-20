@@ -2,12 +2,17 @@ package com.upm.miw.tfm.eatitusersapp.service.client.product;
 
 import com.upm.miw.tfm.eatitusersapp.config.ProductClientFactory;
 import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationException;
+import com.upm.miw.tfm.eatitusersapp.service.client.product.model.Restriction;
+import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Service
 public class ProductClientFacade {
@@ -24,6 +29,22 @@ public class ProductClientFacade {
         boolean exists = product.status() == HttpStatus.OK.value();
         product.close();
         return exists;
+    }
+
+    public Collection<String> getRestrictionIngredients(String restrictionName) {
+        ProductClient productClient = getProductClient(getCredentials());
+        Restriction restrictionDetails = safeGetRestrictionDetails(productClient, restrictionName);
+        return (restrictionDetails == null || restrictionDetails.getIngredients() == null)
+                ? Collections.emptyList() : restrictionDetails.getIngredients();
+    }
+
+    private Restriction safeGetRestrictionDetails(ProductClient productClient, String restrictionName) {
+        try {
+            return productClient.getRestrictionDetails(restrictionName);
+        } catch (FeignException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private UserDetails getCredentials() {

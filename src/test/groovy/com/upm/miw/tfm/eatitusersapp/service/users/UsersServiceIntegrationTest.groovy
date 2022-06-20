@@ -1,19 +1,31 @@
 package com.upm.miw.tfm.eatitusersapp.service.users
 
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
+import com.upm.miw.tfm.eatitusersapp.MockedProductClient
+import com.upm.miw.tfm.eatitusersapp.config.ProductClientFactory
 import com.upm.miw.tfm.eatitusersapp.exception.RoleDoesNotExistValidationException
+import com.upm.miw.tfm.eatitusersapp.exception.UnauthorizedOperationValidationException
 import com.upm.miw.tfm.eatitusersapp.exception.UserAlreadyExistValidationException
 import com.upm.miw.tfm.eatitusersapp.exception.UserDoesNotExistValidationException
+import com.upm.miw.tfm.eatitusersapp.service.client.product.ProductClientFacade
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles
 import com.upm.miw.tfm.eatitusersapp.service.model.User
 import com.upm.miw.tfm.eatitusersapp.service.users.UsersService
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
+import com.upm.miw.tfm.eatitusersapp.web.dto.ProductToleranceInputDTO
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ContextConfiguration
 
+@ContextConfiguration
 class UsersServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     UsersService usersService
+
+    @SpringBean
+    ProductClientFactory productClientFactory = Mock()
 
     def "create a user works successfully" () {
         given:
@@ -165,5 +177,95 @@ class UsersServiceIntegrationTest extends AbstractIntegrationTest {
 
         then:
         thrown(UserDoesNotExistValidationException)
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "user can eat product if user restricted ingredients does not match the product ingredients" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients(["Cacahuetes"]).build())
+
+        when:
+        def response = usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Cebolla"]))
+
+        then:
+        response.isCanEatIt()
+        response.getBlockingIngredients().isEmpty()
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "user can not eat product if user restricted ingredients match with any of the product ingredients" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients(["Cacahuetes"]).build())
+
+        when:
+        def response = usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Jamón"]))
+
+        then:
+        !response.isCanEatIt()
+        response.getBlockingIngredients().contains("Jamón")
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "user can not eat product if user restricted ingredients match with any of the product ingredients and user does not have selected restrictions" () {
+        given:
+        usersRepository.save(User.builder().username("acabezas").restrictions([]).restrictedIngredients(["Cacahuetes", "Jamón"]).build())
+
+        when:
+        def response = usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Jamón"]))
+
+        then:
+        !response.isCanEatIt()
+        response.getBlockingIngredients().contains("Jamón")
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "user can not eat product if user restricted ingredients match with any of the product ingredients and user does not have selected ingredients" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients([]).build())
+
+        when:
+        def response = usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Jamón"]))
+
+        then:
+        !response.isCanEatIt()
+        response.getBlockingIngredients().contains("Jamón")
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "user throws exception when user was not found by username" () {
+        when:
+        usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Jamón"]))
+
+        then:
+        thrown(UserDoesNotExistValidationException)
+    }
+
+    def "service throws exception when user was not authenticated" () {
+        given:
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients([]).build())
+
+        when:
+        usersService.userTolerateIngredients("acabezas", new ProductToleranceInputDTO(["Maíz", "Huevo", "Jamón"]))
+
+        then:
+        thrown(UnauthorizedOperationValidationException)
+    }
+
+    @WithMockUser(username = "acabezas", password = "pass")
+    def "service flat map ingredients and restrictions from user successfully" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón", "Lechuga"])
+        UsersService usersService = new UsersServiceImpl(null, null, new ProductClientFacade(productClientFactory))
+        User user = User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients(["Jamón", "Lechuga", "Tomate"]).build()
+
+        when:
+        def combined = usersService.getCombinedRestrictedIngredients(user)
+
+        then:
+        combined.size() == 4
+        combined.containsAll(["Pechuga de pavo", "Jamón", "Lechuga", "Tomate"])
     }
 }

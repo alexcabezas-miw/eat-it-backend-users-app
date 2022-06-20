@@ -1,8 +1,6 @@
 package com.upm.miw.tfm.eatitusersapp.service.users;
 
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserOutputDTO;
-import com.upm.miw.tfm.eatitusersapp.web.dto.ListUserDTO;
+import com.upm.miw.tfm.eatitusersapp.web.dto.*;
 
 import java.util.Collection;
 
@@ -13,4 +11,5 @@ public interface UsersService {
     ListUserDTO findUserByUsername(String username);
     Collection<String> getRolesByUsername(String username);
     void removeUserByUsername(String username);
+    ProductToleranceResponseDTO userTolerateIngredients(String username, ProductToleranceInputDTO toleranceInputDTO);
 }

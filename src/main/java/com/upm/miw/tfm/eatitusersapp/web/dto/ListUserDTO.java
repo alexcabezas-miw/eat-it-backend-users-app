@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -23,4 +25,10 @@ public class ListUserDTO {
     private String gender;
 
     private String nationality;
+
+    @Builder.Default
+    private Collection<String> restrictedIngredients = new ArrayList<>();
+
+    @Builder.Default
+    private Collection<String> restrictions = new ArrayList<>();
 }

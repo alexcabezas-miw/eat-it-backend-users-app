@@ -1,12 +1,17 @@
 package com.upm.miw.tfm.eatitusersapp.web
 
 import com.upm.miw.tfm.eatitusersapp.AbstractIntegrationTest
+import com.upm.miw.tfm.eatitusersapp.MockedProductClient
+import com.upm.miw.tfm.eatitusersapp.config.ProductClientFactory
 import com.upm.miw.tfm.eatitusersapp.service.model.Roles
 import com.upm.miw.tfm.eatitusersapp.service.model.User
 import com.upm.miw.tfm.eatitusersapp.web.dto.CreateUserInputDTO
+import com.upm.miw.tfm.eatitusersapp.web.dto.ProductToleranceInputDTO
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ContextConfiguration
 
@@ -15,6 +20,9 @@ class UsersControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     UsersController usersController
+
+    @SpringBean
+    ProductClientFactory productClientFactory = Mock()
 
     @WithMockUser(username = "admin", roles = ["ADMIN"])
     def "Create a user works successfully when user does not exist and user is admin" () {
@@ -345,5 +353,56 @@ class UsersControllerIntegrationTest extends AbstractIntegrationTest {
 
         then:
         thrown(AccessDeniedException)
+    }
+
+    @WithMockUser(username = "acabezas", roles = ["DEFAULT_USER"])
+    def "user can eat product which ingredients fits his restrictions" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients(["Cacahuetes"]).build())
+
+        when:
+        def response = usersController.userCanEatProduct(new ProductToleranceInputDTO(["Maíz", "Huevo", "Cebolla"]))
+
+        then:
+        response.getStatusCode() == HttpStatus.OK
+        response.getBody().isCanEatIt()
+        response.getBody().getBlockingIngredients().isEmpty()
+    }
+
+    @WithMockUser(username = "acabezas", roles = ["DEFAULT_USER"])
+    def "user can not eat product which ingredients ddo not fit his restrictions" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+        usersRepository.save(User.builder().username("acabezas").restrictions(["Carne"]).restrictedIngredients(["Cacahuetes"]).build())
+
+        when:
+        def response = usersController.userCanEatProduct(new ProductToleranceInputDTO(["Maíz", "Cacahuetes", "Cebolla"]))
+
+        then:
+        response.getStatusCode() == HttpStatus.OK
+        !response.getBody().isCanEatIt()
+        response.getBody().getBlockingIngredients().size() == 1
+        response.getBody().getBlockingIngredients().contains("Cacahuetes")
+    }
+
+    @WithMockUser(username = "acabezas", roles = ["DEFAULT_USER"])
+    def "server returns 404 when user was not found by username" () {
+        given:
+        productClientFactory.getInstance(_ as String, _ as String) >> new MockedProductClient(["Pechuga de pavo", "Jamón"])
+
+        when:
+        def response = usersController.userCanEatProduct(new ProductToleranceInputDTO(["Maíz", "Cacahuetes", "Cebolla"]))
+
+        then:
+        response.getStatusCode() == HttpStatus.NOT_FOUND
+    }
+
+    def "server throws error when user is not authenticated" () {
+        when:
+        usersController.userCanEatProduct(new ProductToleranceInputDTO(["Maíz", "Cacahuetes", "Cebolla"]))
+
+        then:
+        thrown(AuthenticationCredentialsNotFoundException)
     }
 }
