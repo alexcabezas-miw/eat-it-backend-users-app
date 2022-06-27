@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.upm.miw.tfm</groupId>
 	<artifactId>eatit-users-app</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>EatIt Users management App</name>
 	<description>Service that manages the users of the EatIt app</description>
 	<properties>
