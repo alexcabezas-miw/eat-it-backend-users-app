@@ -1,8 +1,8 @@
 eat-it:
   auth:
-    url: https://eat-it-auth-app.herokuapp.com
+    url: https://eat-it-aut-app.osc-fr1.scalingo.io
   products:
-    url: https://eat-it-products-app.herokuapp.com
+    url: https://eat-it-products-app.osc-fr1.scalingo.io
 
 spring:
   data:
